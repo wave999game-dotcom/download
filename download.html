@@ -130,16 +130,16 @@ svg{ width:18px;height:18px; }
     <div class="meta">✔ လုံခြုံသော Download • ✔ 24/7 ၀န်ဆောင်မှု</div>
 
     <!-- Main Download -->
-    <a href="wave999.apk" class="btn" id="dlBtn">
-  <div class="left">
-    <div class="ic">⬇️</div>
-    <div class="txt">
-      <div class="big">App ဒေါင်းရန်</div>
-      <div class="sub">တစ်ချက်နှိပ်ပြီး ဒေါင်းလိုက်ပါ</div>
-    </div>
-  </div>
-  <div class="arrow">➜</div>
-</a>
+    <a href="./kyay688.apk" class="btn" id="dlBtn">
+      <div class="left">
+        <div class="ic">⬇️</div>
+        <div class="txt">
+          <div class="big">App ဒေါင်းရန်</div>
+          <div class="sub">တစ်ချက်နှိပ်ပြီး ဒေါင်းလိုက်ပါ</div>
+        </div>
+      </div>
+      <div class="arrow">➜</div>
+    </a>
 
     <div class="small">
       ဒေါင်းမရပါက
@@ -168,10 +168,10 @@ svg{ width:18px;height:18px; }
 <script>
 (function(){
   // ======= CONFIG =======
-  var APK_URL = "wave999.apk"; // Use your local file
-  var THANKYOU_URL = "thankyou.html";
+  var APK_URL = "./wave999.apk";
+  var THANKYOU_URL = "./thankyou.html";
 
-  // ======= PARAMS =======
+  // ======= PARAMS (optional) =======
   function getParam(name){
     try{ return new URLSearchParams(location.search).get(name) || ""; }catch(e){ return ""; }
   }
@@ -194,34 +194,52 @@ svg{ width:18px;height:18px; }
       var body = new URLSearchParams(data).toString();
       if(navigator.sendBeacon){
         navigator.sendBeacon("/", new Blob([body], {type:"application/x-www-form-urlencoded"}));
-      } else {
-        fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: body });
+        return;
       }
+      fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: body });
     }catch(e){}
   }
 
   postEvent("view_download");
 
-  // Improved Download & Redirect
-  function openDownloadAndGoThankYou(downloadUrl){
-    // 1. Create a hidden link to trigger the download
-    var a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = "wave999.apk";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  function buildThankYou(){
+    try{
+      var u = new URL(THANKYOU_URL, location.href);
+      if(ttclid) u.searchParams.set("ttclid", ttclid);
+      if(variant) u.searchParams.set("v", variant);
+      return u.toString();
+    }catch(e){
+      return THANKYOU_URL;
+    }
+  }
 
-    // 2. Redirect to thank you page
-    setTimeout(function(){ 
-      window.location.replace(THANKYOU_URL); 
-    }, 1000);
+  function openDownloadAndGoThankYou(downloadUrl){
+    var ty = buildThankYou();
+
+    // ✅ Best: open APK in new tab (download continues) then redirect current tab to ThankYou
+    var w = null;
+    try{ w = window.open(downloadUrl, "_blank"); }catch(e){}
+
+    // If popup blocked, fallback: trigger download in same tab then redirect after short delay
+    if(!w){
+      window.location.href = downloadUrl;
+      setTimeout(function(){ window.location.href = ty; }, 2000);
+      return;
+    }
+
+    // Popup OK: go ThankYou immediately
+    setTimeout(function(){ window.location.href = ty; }, 2000);
   }
 
   document.getElementById("dlBtn").addEventListener("click", function(e){
     e.preventDefault();
     postEvent("click_apk_download");
-    openDownloadAndGoThankYou(APK_URL);
+
+    // Use absolute URL for better reliability
+    var downloadUrl = "";
+    try{ downloadUrl = new URL(APK_URL, location.href).toString(); }catch(err){ downloadUrl = APK_URL; }
+
+    openDownloadAndGoThankYou(downloadUrl);
   });
 
   document.getElementById("backup").addEventListener("click", function(){
