@@ -246,7 +246,7 @@ svg{ width:18px;height:18px; }
   postEvent("view");
 
   // ---------- Open button behavior ----------
-  var DOWNLOAD_PAGE = location.origin + "/download.html";
+  var DOWNLOAD_PAGE = new URL("download.html", window.location.href).href;
   var btn = document.getElementById("openBtn");
 
   function isAndroid(){ return /Android/i.test(navigator.userAgent); }
