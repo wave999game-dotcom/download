@@ -168,10 +168,10 @@ svg{ width:18px;height:18px; }
 <script>
 (function(){
   // ======= CONFIG =======
-  var APK_URL = "https://github.com/wave999game-dotcom/download/releases/download/v1.0/wave999.apk";
-  var THANKYOU_URL = "./thankyou.html";
+  var APK_URL = "wave999.apk"; // Use your local file
+  var THANKYOU_URL = "thankyou.html";
 
-  // ======= PARAMS (optional) =======
+  // ======= PARAMS =======
   function getParam(name){
     try{ return new URLSearchParams(location.search).get(name) || ""; }catch(e){ return ""; }
   }
@@ -194,52 +194,34 @@ svg{ width:18px;height:18px; }
       var body = new URLSearchParams(data).toString();
       if(navigator.sendBeacon){
         navigator.sendBeacon("/", new Blob([body], {type:"application/x-www-form-urlencoded"}));
-        return;
+      } else {
+        fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: body });
       }
-      fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: body });
     }catch(e){}
   }
 
   postEvent("view_download");
 
-  function buildThankYou(){
-    try{
-      var u = new URL(THANKYOU_URL, location.href);
-      if(ttclid) u.searchParams.set("ttclid", ttclid);
-      if(variant) u.searchParams.set("v", variant);
-      return u.toString();
-    }catch(e){
-      return THANKYOU_URL;
-    }
-  }
+  // Improved Download & Redirect
+  function openDownloadAndGoThankYou(downloadUrl){
+    // 1. Create a hidden link to trigger the download
+    var a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = "wave999.apk";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-function openDownloadAndGoThankYou(downloadUrl){
-  // 1. Create the invisible background box for the download
-  var frame = document.createElement("iframe");
-  frame.style.display = "none";
-  frame.src = downloadUrl;
-  document.body.appendChild(frame);
-
-  // 2. Wait 2 seconds, then safely force the exact file path
-  setTimeout(function(){ 
-    // Now this matches your newly renamed file!
-    window.location.href = "thankyou.html"; 
-  }, 2000);
-}
-
-    // Popup OK: go ThankYou immediately
-    setTimeout(function(){ window.location.href = ty; }, 2000);
+    // 2. Redirect to thank you page
+    setTimeout(function(){ 
+      window.location.replace(THANKYOU_URL); 
+    }, 1000);
   }
 
   document.getElementById("dlBtn").addEventListener("click", function(e){
     e.preventDefault();
     postEvent("click_apk_download");
-
-    // Use absolute URL for better reliability
-    var downloadUrl = "";
-    try{ downloadUrl = new URL(APK_URL, location.href).toString(); }catch(err){ downloadUrl = APK_URL; }
-
-    openDownloadAndGoThankYou(downloadUrl);
+    openDownloadAndGoThankYou(APK_URL);
   });
 
   document.getElementById("backup").addEventListener("click", function(){
