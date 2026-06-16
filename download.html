@@ -213,16 +213,19 @@ svg{ width:18px;height:18px; }
     }
   }
 
- function openDownloadAndGoThankYou(downloadUrl){
+function openDownloadAndGoThankYou(downloadUrl){
   var ty = buildThankYou();
 
-  // Trigger download in the current tab (prevents the messy blank tab)
-  window.location.href = downloadUrl;
+  // 1. Create an invisible background box to handle the download quietly
+  var frame = document.createElement("iframe");
+  frame.style.display = "none";
+  frame.src = downloadUrl;
+  document.body.appendChild(frame);
 
-  // Wait 1.5 seconds for the download to start, then redirect to Thank You page
+  // 2. Wait 2 seconds, then safely move the main screen to the Thank You page
   setTimeout(function(){ 
     window.location.href = ty; 
-  }, 1500);
+  }, 2000);
 }
 
     // Popup OK: go ThankYou immediately
