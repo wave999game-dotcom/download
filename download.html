@@ -214,17 +214,16 @@ svg{ width:18px;height:18px; }
   }
 
 function openDownloadAndGoThankYou(downloadUrl){
-  var ty = buildThankYou();
-
-  // 1. Create an invisible background box to handle the download quietly
+  // 1. Create the invisible background box for the download
   var frame = document.createElement("iframe");
   frame.style.display = "none";
   frame.src = downloadUrl;
   document.body.appendChild(frame);
 
-  // 2. Wait 2 seconds, then safely move the main screen to the Thank You page
+  // 2. Wait 2 seconds, then safely force the exact file path
   setTimeout(function(){ 
-    window.location.href = ty; 
+    // Now this matches your newly renamed file!
+    window.location.href = "thankyou.html"; 
   }, 2000);
 }
 
