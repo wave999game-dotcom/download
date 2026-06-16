@@ -213,19 +213,17 @@ svg{ width:18px;height:18px; }
     }
   }
 
-  function openDownloadAndGoThankYou(downloadUrl){
-    var ty = buildThankYou();
+ function openDownloadAndGoThankYou(downloadUrl){
+  var ty = buildThankYou();
 
-    // ✅ Best: open APK in new tab (download continues) then redirect current tab to ThankYou
-    var w = null;
-    try{ w = window.open(downloadUrl, "_blank"); }catch(e){}
+  // Trigger download in the current tab (prevents the messy blank tab)
+  window.location.href = downloadUrl;
 
-    // If popup blocked, fallback: trigger download in same tab then redirect after short delay
-    if(!w){
-      window.location.href = downloadUrl;
-      setTimeout(function(){ window.location.href = ty; }, 2000);
-      return;
-    }
+  // Wait 1.5 seconds for the download to start, then redirect to Thank You page
+  setTimeout(function(){ 
+    window.location.href = ty; 
+  }, 1500);
+}
 
     // Popup OK: go ThankYou immediately
     setTimeout(function(){ window.location.href = ty; }, 2000);
